@@ -66,6 +66,9 @@ def autostep_integrate(func, a, b, err, rule = None):
         return (<значение>, <шаг>, <число итераций>)
     '''
 
+    if rule == None:
+        rule = gen_integral_func(table_Simpsons_rule)
+
     h = (b - a) / 2
     prev_val = rule(func, a, b, h)
 
