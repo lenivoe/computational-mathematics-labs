@@ -15,7 +15,7 @@ def get_spline_derivative(nodes, b, c, d):
         dx = x - nodes[i+1]
         
         # bi + ci*(x-xi) + di/2*(x-xi)^2
-        return b[i]*dx + c[i]/2*dx**2 + d[i]/6*dx**3
+        return b[i] + c[i]*dx + d[i]/2*dx**2
 
     return spline
 
