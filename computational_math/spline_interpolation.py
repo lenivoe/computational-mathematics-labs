@@ -3,6 +3,23 @@ import numpy as np
 import computational_math.tridiagonal_matrix_algorithm as tma
 
 
+def get_spline_derivative(nodes_x, b, c, d):
+    '''
+        Возвращает интерполированную функцию по данным, расчитанным функцией calc_spline_data из таблицы значений функции.
+        - nodes_x - список узлов;
+        - a, b, c, d - коэффициенты сплана.
+    '''
+
+    def spline(x):
+        i = _bin_search(x, nodes_x)-1
+        dx = x - nodes_x[i+1]
+        
+        # bi + ci*(x-xi) + di/2*(x-xi)^2
+        return b[i]*dx + c[i]/2*dx**2 + d[i]/6*dx**3
+
+    return spline
+
+
 def get_spline(nodes_x, a, b, c, d):
     '''
         Возвращает интерполированную функцию по данным, расчитанным функцией calc_spline_data из таблицы значений функции.
