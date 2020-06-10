@@ -15,6 +15,7 @@ IMG_DIR = f'{DATA_DIR}/img'
 def main():
     func_tests = {
         'x^4' : (lambda x: x**4, lambda x: (x**5) / 5),
+        'x^3' : (lambda x: x**3, lambda x: (x**4) / 4),
         'sin(x)' : (np.sin, lambda x: -np.cos(x)),
         '-2x*e^(-x^2)' : (lambda x: -2*x*np.exp(-x**2), lambda x: np.exp(-x**2)),
     }
