@@ -3,7 +3,7 @@ from matplotlib import mlab
 import numpy as np
 import math
 
-def getInterpolatedFunc(nodes_x :np.ndarray, nodes_y :np.ndarray):
+def get_Lagrange_polynomial(nodes_x :np.ndarray, nodes_y :np.ndarray):
     '''
         Возвращает интерполированную функцию по сетке из услов и значениям интерполируемой функции в них.
         - nodes_x - список узлов;

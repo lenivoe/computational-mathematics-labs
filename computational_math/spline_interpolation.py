@@ -2,9 +2,27 @@ import numpy as np
 
 import computational_math.tridiagonal_matrix_algorithm as tma
 
-def getInterpolatedFunc(nodes_x :np.ndarray, nodes_y :np.ndarray):
+
+def get_spline(nodes_x, a, b, c, d):
     '''
-        Возвращает интерполированную функцию по сетке из услов и значениям интерполируемой функции в них.
+        Возвращает интерполированную функцию по данным, расчитанным функцией calc_spline_data из таблицы значений функции.
+        - nodes_x - список узлов;
+        - a, b, c, d - коэффициенты сплана.
+    '''
+
+    def spline(x):
+        i = _bin_search(x, nodes_x)-1
+        dx = x - nodes_x[i+1]
+        
+        # ai + bi*(x-xi) + ci/2*(x-xi)^2 + di/6*(x-xi)^3
+        return a[i] + b[i]*dx + c[i]/2*dx**2 + d[i]/6*dx**3
+
+    return spline
+
+
+def calc_spline_data(nodes_x :np.ndarray, nodes_y :np.ndarray):
+    '''
+        Возвращает вектора с коэффициентами a, b, c, d, необходимые для функции сплайна.
         - nodes_x - список узлов;
         - nodes_y - список значений интерполируемой функции в узлах.
     '''
@@ -20,19 +38,13 @@ def getInterpolatedFunc(nodes_x :np.ndarray, nodes_y :np.ndarray):
     c[0] = c[-1] = 0 # точные нули на всякий
     d = (c[1:] - c[:-1]) / hx
     
-    c = c[1:] / 2
-    d /= 6
+    c = c[1:]
 
-    b = hx*c - hx*hx*d + hy/hx
+    b = hx*c/2 - hx*hx*d/6 + hy/hx
 
-    def spline(x):
-        i = _bin_search(x, nodes_x)-1
-        dx = x - nodes_x[i+1]
-        
-        # a_i + b_i*(x-x_i) + c_i/2*(x-x_i)^2 + d_i/6*(x-x_i)^3
-        return a[i] + b[i]*dx + c[i]*dx*dx + d[i]*dx*dx*dx
+    return a, b, c, d
 
-    return spline
+
 
 def _gen_tma_data(hx, hy):
     assert len(hx) == len(hy)
@@ -43,6 +55,8 @@ def _gen_tma_data(hx, hy):
         yield (hx[i], 2*(hx[i]+hx[i+1]), hx[i+1], 6*(hy[i+1]/hx[i+1] - hy[i]/hx[i]))
     
     yield (0, 1, 0, 0)
+
+
 
 def _bin_search(x, vec_x):
     lt, rt = 0, len(vec_x)-1

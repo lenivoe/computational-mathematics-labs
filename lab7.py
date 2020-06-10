@@ -118,8 +118,8 @@ def standard_test(lines_it, func_tests):
 
     assert np.array_equal(np.array(sorted(set(nodes_x))), nodes_x), 'nodes must be ordered without repetitions'
 
-    L_n = Lpi.getInterpolatedFunc(nodes_x, nodes_y)
-    S = si.getInterpolatedFunc(nodes_x, nodes_y)
+    L_n = Lpi.get_Lagrange_polynomial(nodes_x, nodes_y)
+    S = si.get_spline(nodes_x, *si.calc_spline_data(nodes_x, nodes_y))
     L_n, S = vectorize(L_n), vectorize(S)
 
     title = f'f(x)={func_name},  узлы: {nodes_x}'
@@ -140,12 +140,12 @@ def errors_test(lines_it, func_tests):
 
     y = nodes_y[i]
 
-    S = si.getInterpolatedFunc(nodes_x, nodes_y)
+    S = si.get_spline(nodes_x, *si.calc_spline_data(nodes_x, nodes_y))
     func_list = [func, vectorize(S)]
 
     for err in errors:
         nodes_y[i] = y + err
-        S = si.getInterpolatedFunc(nodes_x, nodes_y)
+        S = si.get_spline(nodes_x, *si.calc_spline_data(nodes_x, nodes_y))
         func_list.append(vectorize(S))
 
     title = f'f(x)={func_name},  узлы: {nodes_x}, ошибка в: {nodes_x[i]}'
@@ -202,9 +202,9 @@ def test_parametric_func(list_len):
         for nodes_t, ax in zip(nodes_t_list, axes):
             vec_t = np.arange(init_t[0], init_t[-1], 0.01)
             ax.plot(func_x(vec_t), func_y(vec_t), label='heart')
-
-            int_x = si.getInterpolatedFunc(nodes_t, nodes_x)
-            int_y = si.getInterpolatedFunc(nodes_t, nodes_y)
+            
+            int_x = si.get_spline(nodes_t, *si.calc_spline_data(nodes_t, nodes_x))
+            int_y = si.get_spline(nodes_t, *si.calc_spline_data(nodes_t, nodes_y))
             int_x, int_y = vectorize(int_x), vectorize(int_y)
 
             vec_t = np.arange(nodes_t[0], nodes_t[-1], 0.01)
