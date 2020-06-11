@@ -7,6 +7,8 @@ def vectorize(func):
     
     return lambda vec: np.fromiter(map(func, vec), float, len(vec))
 
+def frange(begin, end, step):
+    return np.linspace(begin, end, int((end-begin)/step)+1)
 
 def scale_img(img_name :str, scale :float):
     img = Image.open(img_name)
