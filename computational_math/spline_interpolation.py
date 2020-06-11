@@ -1,6 +1,7 @@
 import numpy as np
 
 import computational_math.tridiagonal_matrix_algorithm as tma
+from computational_math.utils import bin_search
 
 
 def get_spline_derivative(nodes, b, c, d):
@@ -11,7 +12,7 @@ def get_spline_derivative(nodes, b, c, d):
     '''
 
     def spline(x):
-        i = _bin_search(x, nodes)-1
+        i = bin_search(x, nodes)-1
         dx = x - nodes[i+1]
         
         # bi + ci*(x-xi) + di/2*(x-xi)^2
@@ -28,7 +29,7 @@ def get_spline(nodes, a, b, c, d):
     '''
 
     def spline(x):
-        i = _bin_search(x, nodes)-1
+        i = bin_search(x, nodes)-1
         dx = x - nodes[i+1]
         
         # ai + bi*(x-xi) + ci/2*(x-xi)^2 + di/6*(x-xi)^3
@@ -74,15 +75,3 @@ def _gen_tma_data(hx, hy):
     yield (0, 1, 0, 0)
 
 
-
-def _bin_search(x, vec_x):
-    lt, rt = 0, len(vec_x)-1
-    while lt < rt:
-        cur = lt+(rt-lt+1)//2
-        if vec_x[cur-1] <= x and x <= vec_x[cur]:
-            return cur
-        if x < vec_x[cur-1]:
-            rt = cur-1
-        else:
-            lt = cur
-    return 0 if x < vec_x[0] else len(vec_x)-1
