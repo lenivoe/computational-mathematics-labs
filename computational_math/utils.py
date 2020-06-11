@@ -26,10 +26,10 @@ def bin_search(x, vec_x):
     lt, rt = 0, len(vec_x)-1
     while lt < rt:
         cur = lt+(rt-lt+1)//2
-        if vec_x[cur-1] <= x and x <= vec_x[cur]:
+        if vec_x[cur-1] < x and x <= vec_x[cur]:
             return cur
-        if x < vec_x[cur-1]:
+        if x <= vec_x[cur-1]:
             rt = cur-1
         else:
             lt = cur
-    return 0 if x < vec_x[0] else len(vec_x)-1
+    return 0 if x <= vec_x[0] else len(vec_x)-1
