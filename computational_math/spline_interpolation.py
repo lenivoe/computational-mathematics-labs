@@ -11,14 +11,14 @@ def get_spline_derivative(nodes, b, c, d):
         - a, b, c, d - коэффициенты сплана.
     '''
 
-    def spline(x):
+    def derivative(x):
         i = bin_search(x, nodes)-1
         dx = x - nodes[i+1]
         
         # bi + ci*(x-xi) + di/2*(x-xi)^2
         return b[i] + c[i]*dx + d[i]/2*dx**2
 
-    return spline
+    return derivative
 
 
 def get_spline(nodes, a, b, c, d):
