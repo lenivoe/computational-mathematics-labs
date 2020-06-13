@@ -12,7 +12,7 @@ def get_spline_derivative(nodes, b, c, d):
     '''
 
     def derivative(x):
-        i = bin_search(x, nodes)-1
+        i = (bin_search(x, nodes) or 1) - 1
         dx = x - nodes[i+1]
         
         # bi + ci*(x-xi) + di/2*(x-xi)^2
@@ -29,7 +29,7 @@ def get_spline(nodes, a, b, c, d):
     '''
 
     def spline(x):
-        i = bin_search(x, nodes)-1
+        i = (bin_search(x, nodes) or 1) - 1
         dx = x - nodes[i+1]
         
         # ai + bi*(x-xi) + ci/2*(x-xi)^2 + di/6*(x-xi)^3
