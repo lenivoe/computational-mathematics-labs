@@ -3,6 +3,42 @@ import multiprocessing as mp
 
 import numpy as np
 
+import computational_math.spline_interpolation as cmsi
+
+
+def max_ordered(vec, pred):
+    for i, (a, b) in enumerate(zip(vec[:-1], vec[1:])):
+        if not pred(a, b):
+            return i
+    return len(vec)-1
+
+def generate_spline_list(nodes, values):
+    spline_list = []
+
+    i = 0
+    while len(nodes) > 1:
+        less = max_ordered(nodes, np.less)
+        greater = max_ordered(nodes, np.greater)
+        
+        if less >= greater:
+            sub_nodes, sub_values = nodes[:less+1], values[:less+1]
+        else:
+            sub_nodes, sub_values = nodes[greater::-1], values[greater::-1]
+            
+        assert len(sub_nodes) > 1 and sub_nodes[0] < sub_nodes[1]
+        
+        i = max(less, greater)
+        values, nodes = values[i:], nodes[i:]
+        
+        if not (len(sub_nodes) == 2 and abs(sub_nodes[0]-sub_nodes[-1]) <= 0):
+            spline = cmsi.get_spline(sub_nodes, *cmsi.calc_spline_data(sub_nodes, sub_values))
+
+            # добавляется (<первый узел>, <последний узел>, <сплайн>)
+            spline_list.append((*sub_nodes[[0, -1]], spline))
+
+    
+    return spline_list
+
 
 def get_is_inside_func(x_vec, y_vec):
     '''
@@ -10,46 +46,29 @@ def get_is_inside_func(x_vec, y_vec):
         внутри многоугольинка с вершинами в (x_vec, y_vec)
     '''
 
-    above = (x_vec - np.concatenate([x_vec[-1:], x_vec[:-1]]))
-    under = (y_vec - np.concatenate([y_vec[-1:], y_vec[:-1]]))
-
-    factors = np.empty(len(x_vec))
-    factors[:] = np.NaN
-
-    np.divide(above, under, out=factors, where=under!=0)
-
-    del above, under
+    splines = generate_spline_list(y_vec, x_vec)
 
     def is_inside(x, y):
         is_in = False
-        amount = 0
 
-        for i in range(len(x_vec)):
-            next_i = (i + 1) % len(x_vec)
-
-            x_next, y_next = x_vec[next_i], y_vec[next_i]
-            x_cur, y_cur = x_vec[i], y_vec[i]
-            k = factors[i]
-            
-            if (y_next <= y and y < y_cur) or (y_cur <= y and y < y_next):
-                if k != np.NaN:
-                    if x > (k * (y - y_next) + x_next):
-                        is_in = not is_in
+        for y_min, y_max, spline in splines:
+            if y_min <= y and y <= y_max:
+                if x > spline(y):
+                    is_in = not is_in
 
         return is_in
 
     return is_inside
 
 
+
 def monte_karlo(x_nodes, y_values, x_points, y_points):
-    inside_amount = 0
     is_inside = get_is_inside_func(x_nodes, y_values)
 
-    for x, y in zip(x_points, y_points):
-        if is_inside(x, y):
-            inside_amount += 1
-    
-    return inside_amount/len(x_points)
+    is_inside_list = (is_inside(x, y) for x, y in zip(x_points, y_points))
+    is_inside_list = np.fromiter(is_inside_list, bool, len(x_points))
+
+    return sum(is_inside_list)/len(x_points), is_inside_list
 
 
 
@@ -60,7 +79,7 @@ def monte_karlo_integrate(x_nodes, y_values, points_amount):
     x_points = np.random.sample(points_amount) * (x_max-x_min) + x_min
     y_points = np.random.sample(points_amount) * (y_max-y_min) + y_min
 
-    part = monte_karlo(x_nodes, y_values, x_points, y_points)
+    ratio, is_inside_list = monte_karlo(x_nodes, y_values, x_points, y_points)
 
-    In = (x_max-x_min)*(y_max-y_min)*part
-    return In, x_points, y_points
+    In = (x_max-x_min)*(y_max-y_min)*ratio
+    return In, x_points, y_points, is_inside_list
