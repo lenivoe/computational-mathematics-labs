@@ -4,21 +4,19 @@ import computational_math.tridiagonal_matrix_algorithm as tma
 from computational_math.utils import bin_search
 
 
-def get_spline_derivative(nodes, b, c, d):
-    '''
-        Возвращает интерполированную функцию по данным, расчитанным функцией calc_spline_data из таблицы значений функции.
-        - nodes - список узлов;
-        - a, b, c, d - коэффициенты сплана.
-    '''
+def spline(x, nodes, a, b, c, d):
+    i = (bin_search(x, nodes) or 1) - 1
+    dx = x - nodes[i+1]
+    
+    # ai + bi*(x-xi) + ci/2*(x-xi)^2 + di/6*(x-xi)^3
+    return a[i] + b[i]*dx + c[i]/2*dx**2 + d[i]/6*dx**3
 
-    def derivative(x):
-        i = (bin_search(x, nodes) or 1) - 1
-        dx = x - nodes[i+1]
-        
-        # bi + ci*(x-xi) + di/2*(x-xi)^2
-        return b[i] + c[i]*dx + d[i]/2*dx**2
-
-    return derivative
+def d_spline(x, nodes, b, c, d):
+    i = (bin_search(x, nodes) or 1) - 1
+    dx = x - nodes[i+1]
+    
+    # bi + ci*(x-xi) + di/2*(x-xi)^2
+    return b[i] + c[i]*dx + d[i]/2*dx**2
 
 
 def get_spline(nodes, a, b, c, d):
@@ -27,15 +25,16 @@ def get_spline(nodes, a, b, c, d):
         - nodes - список узлов;
         - a, b, c, d - коэффициенты сплана.
     '''
+    return lambda x: spline(x, nodes, a, b, c, d)
 
-    def spline(x):
-        i = (bin_search(x, nodes) or 1) - 1
-        dx = x - nodes[i+1]
-        
-        # ai + bi*(x-xi) + ci/2*(x-xi)^2 + di/6*(x-xi)^3
-        return a[i] + b[i]*dx + c[i]/2*dx**2 + d[i]/6*dx**3
 
-    return spline
+def get_spline_derivative(nodes, b, c, d):
+    '''
+        Возвращает интерполированную функцию по данным, расчитанным функцией calc_spline_data из таблицы значений функции.
+        - nodes - список узлов;
+        - b, c, d - коэффициенты сплана.
+    '''
+    return lambda x: d_spline(x, nodes, b, c, d)
 
 
 def calc_spline_data(nodes :np.ndarray, values :np.ndarray):
