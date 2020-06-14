@@ -5,7 +5,7 @@ import os
 import matplotlib.pyplot as plt
 import numpy as np
 
-from computational_math.utils import vectorize
+from computational_math.utils import vectorize, scale_img
 from computational_math.spline_interpolation import calc_spline_data, get_spline, get_spline_derivative
 from computational_math.integral import autostep_integrate
 from computational_math.monte_karlo_parallel import monte_karlo_integrate
@@ -55,7 +55,7 @@ def main():
     err = 10**-5
     table_size = 101
 
-    points_amounts = (10**3, 10**4, 10**5)
+    points_amounts = (10**3, 10**4, 10**5, 10**6, )
 
 
     excess_files = set(os.listdir(IMG_DIR)) - set(map(lambda i: f'{i}.png', range(len(table_names)*len(points_amounts))))
@@ -71,7 +71,7 @@ def main():
                 t_nodes = gen_nodes_t_by_index(x_values, y_values)
 
                 # интегрирование методом Монте-Карло
-                monte_karlo_sqr, *points = monte_karlo_integrate(x_values, y_values, points_amount)
+                monte_karlo_sqr, x_points, y_points, is_inside = monte_karlo_integrate(x_values, y_values, points_amount)
 
                 # создание сплайнов
                 abcd_y_data = calc_spline_data(t_nodes, y_values)
@@ -85,7 +85,7 @@ def main():
 
                 # интегрирование формулой Симпсона
                 integrand_func = vectorize(lambda t: y_func(t) * dx_func(t))
-                simpson_sqr, *_ = autostep_integrate(integrand_func, t_nodes[0], t_nodes[-1], err)
+                simpson_sqr, h, iter_amount = autostep_integrate(integrand_func, t_nodes[0], t_nodes[-1], err)
                 simpson_sqr = abs(simpson_sqr)
 
 
@@ -97,7 +97,10 @@ def main():
 
                 x_vec, y_vec = x_func(t_vec), y_func(t_vec)
 
-                ax.plot(*points, marker='o', ls='', markersize=1)
+
+                ax.plot(x_points[is_inside], y_points[is_inside], marker='o', ls='', markersize=1)
+                is_outside = False == is_inside
+                ax.plot(x_points[is_outside], y_points[is_outside], marker='o', ls='', markersize=1)
                 ax.plot(x_vec, y_vec, linewidth=3)
 
                 title = f'{name}, число точек: {points_amount:.0e}\n'
@@ -108,8 +111,65 @@ def main():
                 
                 print('test:', i)
                 i += 1
+    
+    
+    for fname in os.listdir(f'{IMG_DIR}'):
+        scale_img(f'{IMG_DIR}/{fname}', 0.8)
 
 
+
+def test():
+    import computational_math.Lagrange_polynomial_interpolation as cmLi
+
+    err = 10**-5
+    table_size = 1001
+
+    # генерация таблицы
+    x_values, y_values = gen_heart_table(table_size)
+    t_nodes = gen_nodes_t_by_index(x_values, y_values)
+
+    # создание сплайнов
+    abcd_y_data = calc_spline_data(t_nodes, y_values)
+    abcd_x_data = calc_spline_data(t_nodes, x_values)
+    _, *bcd_dx_data = abcd_x_data
+    
+    y_func = get_spline(t_nodes, *abcd_y_data)
+    dx_func = get_spline_derivative(t_nodes, *bcd_dx_data)
+    
+
+    # интегрирование формулой Симпсона
+    integrand_func = vectorize(lambda t: y_func(t) * dx_func(t))
+    simpson_sqr, *_ = autostep_integrate(integrand_func, t_nodes[0], t_nodes[-1], err)
+    simpson_sqr = abs(simpson_sqr)
+
+
+    # отображение графика
+    
+    t_vec = np.linspace(t_nodes[0], t_nodes[-1], int((t_nodes[-1]-t_nodes[0])/0.01) + 1)
+    ft_vec = integrand_func(t_vec)
+
+    # Лагранж
+    def foo(a,b):
+        t_nodes = np.linspace(a, b, 3)
+        ft_values = integrand_func(t_nodes)
+
+        Ln = cmLi.get_Lagrange_polynomial(t_nodes, ft_values)
+        Ln = vectorize(Ln)
+
+        t = np.linspace(a, b, int(100*(a+b)/2) + 1)
+        return t, Ln(t)
+    
+    for p in range(7):
+        _, ax = plt.subplots()
+        ax.plot(t_vec, ft_vec, linewidth=3)
+        
+        t = np.linspace(t_nodes[0], t_nodes[-1], 2*(2**p)+1)
+        for a, b in zip(t[:-1], t[1:]):
+            ax.plot(*foo(a,b), linewidth=2)
+            
+        plt.show()
+
+        
 
 if __name__ == '__main__':
     main()
