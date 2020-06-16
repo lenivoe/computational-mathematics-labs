@@ -44,6 +44,7 @@ def plot(func, a, b, roots, need_exclude_correct=True, *, title=''):
     
     plt.title(title)
     plt.savefig(f'{IMG_DIR}/{len(os.listdir(IMG_DIR))+1:02}.png', bbox_inches='tight', pad_inches=0)
+    #plt.show()
     plt.close(fig)
     
     return has_errors
@@ -72,6 +73,12 @@ def main():
             lambda x: 2*np.log(x)*np.sin(np.pi/2*x)/x + np.pi/2*np.log(x)**2 * np.cos(np.pi/2*x),
             lambda x: -(((np.pi*x*np.log(x))**2 + 8*np.log(x) - 8)*np.sin(np.pi/2*x) 
                             - 8*np.pi*x*np.log(x)*np.cos(np.pi/2*x))/(4*x**2),
+        ),
+
+        'x^3 - 8*x^2 + 12*x = 0' : (
+            lambda x: x**3 - 8*x**2 + 12*x,
+            lambda x: 3*x**2 - 16*x + 12,
+            lambda x: 6*x - 16,
         ),
     }
 
