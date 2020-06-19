@@ -45,7 +45,7 @@ def Runge_Kutta_with_auto_step(eq_system, y0_list, a, b, err):
 
         while True:
             k1, k2, k3, k4 = _calc_k(eq_system, a, y_list, h)
-            cur_err = ((k1 - k2 - k3 + k4)*(2/3)).max()
+            cur_err = (abs(k1 - k2 - k3 + k4)*(2/3)).max()
             if h < H_MIN or cur_err < err:
                 return h, cur_err
             h /= 2
