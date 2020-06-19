@@ -6,7 +6,7 @@ import matplotlib.pyplot as plt
 import numpy as np
 import os
 
-from computational_math.utils import *
+from computational_math.utils import vectorize, power
 import computational_math.Lagrange_polynomial_interpolation as Lpi
 import computational_math.spline_interpolation as si
 
@@ -28,8 +28,8 @@ def plot(*func_list, labels=None, title='', x_min=-1, x_max=1, need_show=True, i
     '''
 
     assert img_name and not img_name.isspace() or need_show, 'plot func must output something'
-    
-    if labels == None:
+
+    if labels is None:
         labels = (None, )*len(func_list)
 
     _, ax = plt.subplots()
@@ -41,7 +41,7 @@ def plot(*func_list, labels=None, title='', x_min=-1, x_max=1, need_show=True, i
     ax.set_title(title)
     ax.legend()
     plt.subplots_adjust(left=0.08, bottom=0.06, right=0.98, top=0.94, wspace=0.11, hspace=0.11)
-    
+
     if img_name:
         plt.savefig(img_name)
     if need_show:
@@ -54,23 +54,25 @@ def to_nums(s):
     return map(float, s.split())
 
 
-def str_to_filename(s:str):
+def str_to_filename(s: str):
     return s.replace('|', ' I ').replace('/', ' div ')
+
 
 def get_plot_filename(test_mode, func_name, nodes_x):
     amount = reduce(lambda sum, _: sum+1, os.listdir(f'{IMG_DIR}'), 1)
-    return f'{IMG_DIR}/{amount:03} {test_mode} {str_to_filename(func_name)} [{" ".join(map(str, nodes_x))}].png'
+    nodes_str = " ".join(map(str, nodes_x))
+    return f'{IMG_DIR}/{amount:03} {test_mode} {str_to_filename(func_name)} [{nodes_str}].png'
 
 
 def main():
     func_tests = {
-        '|x|'        : np.abs,
-        'e^(-x^2)'   : lambda x: np.exp(-x*x),
-        'sin(x)'     : np.sin,
-        'x^(4/3)'    : vectorize(lambda x: power(x, 4, 3)),
-        'e^(x^4)'    : lambda x: np.exp(x**4),
-        'x^3'        : lambda x: x**3,
-        'x^9'        : lambda x: x**9,
+        '|x|': np.abs,
+        'e^(-x^2)': lambda x: np.exp(-x*x),
+        'sin(x)': np.sin,
+        'x^(4/3)': vectorize(lambda x: power(x, 4, 3)),
+        'e^(x^4)': lambda x: np.exp(x**4),
+        'x^3': lambda x: x**3,
+        'x^9': lambda x: x**9,
     }
 
     ifname = f'{DATA_DIR}/input.txt'
@@ -108,7 +110,8 @@ def main():
 
             except StopIteration:
                 break
-        
+
+
 def standard_test(lines_it, func_tests):
     func_name = next(lines_it)
     func = func_tests[func_name]
@@ -116,17 +119,20 @@ def standard_test(lines_it, func_tests):
     nodes_x = np.fromiter(to_nums(next(lines_it)), float)
     nodes_y = func(nodes_x)
 
-    assert np.array_equal(np.array(sorted(set(nodes_x))), nodes_x), 'nodes must be ordered without repetitions'
+    assert np.array_equal(np.array(sorted(set(nodes_x))),
+                          nodes_x), 'nodes must be ordered without repetitions'
 
     L_n = Lpi.get_Lagrange_polynomial(nodes_x, nodes_y)
     S = si.get_spline(nodes_x, *si.calc_spline_data(nodes_x, nodes_y))
     L_n, S = vectorize(L_n), vectorize(S)
 
     title = f'f(x)={func_name},  узлы: {nodes_x}'
-    
+
     labels = (func_name, 'Lagrange', 'spline')
     image_name = get_plot_filename('standard', func_name, nodes_x)
-    plot(func, L_n, S, labels=labels, title=title, x_min=nodes_x[0], x_max=nodes_x[-1], need_show=False, img_name=image_name)
+    plot(func, L_n, S, labels=labels, title=title,
+         x_min=nodes_x[0], x_max=nodes_x[-1], need_show=False, img_name=image_name)
+
 
 def errors_test(lines_it, func_tests):
     func_name = next(lines_it)
@@ -151,19 +157,21 @@ def errors_test(lines_it, func_tests):
     title = f'f(x)={func_name},  узлы: {nodes_x}, ошибка в: {nodes_x[i]}'
     labels = (func_name, 'error: 0', *(f'error: {err}' for err in errors))
     image_name = get_plot_filename('errors', func_name, nodes_x)
-    plot(*func_list, labels=labels, title=title, x_min=nodes_x[0], x_max=nodes_x[-1], need_show=False, img_name=image_name)
+    plot(*func_list, labels=labels, title=title,
+         x_min=nodes_x[0], x_max=nodes_x[-1], need_show=False, img_name=image_name)
+
 
 def test_parametric_func(list_len):
     # heart
     heart_name = 'heart'
-    heart_x = lambda t: 16*(np.sin(t)**3)
-    heart_y = lambda t: 13*np.cos(t) - 5*np.cos(2*t) - 2*np.cos(3*t) - np.cos(4*t)
+    def heart_x(t): return 16*(np.sin(t)**3)
+    def heart_y(t): return 13*np.cos(t) - 5*np.cos(2*t) - 2*np.cos(3*t) - np.cos(4*t)
     heart_t = np.linspace(0, 2*math.pi, num=list_len)
 
     # e^(-x^2)
     exp_name = 'e^(-x^2)'
-    exp_x = lambda x: x
-    exp_y = lambda x: np.exp(-x**2)
+    def exp_x(x): return x
+    def exp_y(x): return np.exp(-x**2)
     exp_t = np.linspace(-4, 4, num=list_len)
 
     data = zip([heart_name, exp_name], [heart_x, exp_x], [heart_y, exp_y], [heart_t, exp_t])
@@ -192,7 +200,6 @@ def test_parametric_func(list_len):
         nodes_t = np.fromiter(accumulate((0, *dt)), float)
         nodes_t_list.append(nodes_t)
 
-        
         nrows = math.ceil(len(nodes_t_list)/2)
         ncols = math.floor(len(nodes_t_list)/2)
         size = int(len(nodes_t_list)*2.5)
@@ -202,7 +209,7 @@ def test_parametric_func(list_len):
         for nodes_t, ax in zip(nodes_t_list, axes):
             vec_t = np.arange(init_t[0], init_t[-1], 0.01)
             ax.plot(func_x(vec_t), func_y(vec_t), label='heart')
-            
+
             int_x = si.get_spline(nodes_t, *si.calc_spline_data(nodes_t, nodes_x))
             int_y = si.get_spline(nodes_t, *si.calc_spline_data(nodes_t, nodes_y))
             int_x, int_y = vectorize(int_x), vectorize(int_y)
@@ -223,12 +230,9 @@ def test_parametric_func(list_len):
 
         plt.subplots_adjust(left=0.05, right=0.985, bottom=0.06, top=0.94, wspace=0.11, hspace=0.11)
         plt.savefig(get_plot_filename('parametric', func_name, [list_len]))
-        #plt.show()
+        # plt.show()
         plt.close('all')
-
 
 
 if __name__ == '__main__':
     main()
-
-

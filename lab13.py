@@ -45,7 +45,7 @@ def main():
     desired_systems = np.array([
         [lambda x: x**2],
         [lambda x: x**2],
-        [lambda x: -3*np.cos(x)+5*np.sin(x)+4, lambda x: -4*np.cos(x)+np.sin(x)+2],
+        [lambda x: -3*np.cos(x)+5*np.sin(x)+4, lambda x: - 4*np.cos(x)+np.sin(x)+2],
         [lambda x: (5 + 2*x)*np.e**x, lambda x: (8 + 4*x)*np.e**x]
     ])
 
