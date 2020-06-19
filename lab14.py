@@ -5,8 +5,8 @@ import numpy as np
 # а второе (u) не имеет, но имеет решение на правой границе интервала (u(b))
 # l_r -- интервал, внутри которого (как ожидается) лежит u(a)
 # a_b -- интервал для Коши
-def shooting_method(eq_system, a, b, va, ub, h, e) :
-    segment = find_segment(eq_system, a, b, va, ub, h, e)
+def shooting_method(eq_system, a, b, l, r, va, ub, h, e) :
+    segment = find_segment(eq_system, a, b, l, r, va, ub, h, e)
     x_vec, y_vec = find_ua(eq_system, a, b, va, ub, h, e, segment)
     return x_vec, y_vec
 
@@ -16,9 +16,9 @@ def find_segment(eq_system, a, b, l, r, va, ub, h, e) :
         _, result = Runge_Kutta_with_auto_step(eq_system, np.array((va, u0)), a, b, e)
         return result[-1][1]
 
-    vector = np.array([np.arange(a, b, h)])
+    vector = np.array([np.arange(l, r, h)])
     
-    right_value = calc_ub(a)
+    right_value = calc_ub(l)
     left_value = None
     for i in range(1, len(vector)):
         left_value = right_value
