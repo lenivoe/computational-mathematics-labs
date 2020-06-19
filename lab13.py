@@ -29,7 +29,7 @@ def save_plot(img_name, title, x_vec, y_mx, a, b, desired_system):
 
 def main():
     eq_systems_names = [
-        'dy/dx = 3x + y - x**3',
+        'dy/dx = x + y - x**3',
         'dy/dx = 3x - 10(y - x**3)',
         'dy1/dx = -2*y1 + 4*y2\n' 'dy2/dx = -y1 + 3*y2',
     ]
@@ -106,7 +106,7 @@ def task5():
 
             title = f'{system_name}\n' '[{a}, {b}]   h: {h} \n'
             print(title, file=writer)
-            save_plot(f'{i}.png', title, x_vec, y_mx, [])
+            save_plot(f'{i}.png', title, x_vec, y_mx, a, b, [])
 
         print(file=writer)
 
