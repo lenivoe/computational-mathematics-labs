@@ -29,21 +29,24 @@ def save_plot(img_name, title, x_vec, y_mx, a, b, desired_system):
 
 def main():
     eq_systems_names = [
-        'dy/dx = x + y - x**3',
-        'dy/dx = 3x - 10(y - x**3)',
-        'dy1/dx = -2*y1 + 4*y2\n' 'dy2/dx = -y1 + 3*y2',
+        'dy/dx = 2x + y - x**2',
+        'dy/dx = 2x + 5(y - x**2)',
+        'dy1/dx = -y1-2*y2\n' 'dy2/dx = y1-y2-2',
+        'dy1/dx = 3*y1-y2\n' 'dy2/dx = 4*y1-y2',
     ]
 
     eq_systems = np.array([
         [lambda x, y: 3 * x**2 + (y - x**3)],
         [lambda x, y: 3 * x**2 - 10 * (y - x**3)],
-        [lambda x, y1, y2: -2*y1 + 4*y2, lambda x, y1, y2: -y1 + 3*y2],
+        [lambda x, y1, y2: y1-2*y2, lambda x, y1, y2: y1-y2-2],
+        [lambda x, y1, y2: 3*y1-y2, lambda x, y1, y2: 4*y1-y2]
     ])
 
     desired_systems = np.array([
-        [lambda x: x**3],
-        [lambda x: x**3],
-        [lambda x: 4 * np.exp(-x) - np.exp(2 * x), lambda x: np.exp(-x) - np.exp(2 * x)]
+        [lambda x: x**2],
+        [lambda x: x**2],
+        [lambda x: -3*np.cos(x)+5*np.sin(x)+4, lambda x: -4*np.cos(x)+np.sin(x)+2],
+        [lambda x: (5 + 2*x)*np.e**x, lambda x: (8 + 4*x)*np.e**x]
     ])
 
     if not os.path.isdir(IMG_DIR):
