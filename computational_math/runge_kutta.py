@@ -19,20 +19,24 @@ def _calc_k(eq_system, x, y_list, h):
 
 
 def Runge_Kutta_method(eq_system, y0_list, a, b, h):
+    '''возвращает вектор X и матрицу Y, в которой Y[i] соответствует X[i]'''
+
     x_vec = np.concatenate([np.arange(a, b, h), [b]])
     cur_y_list = y0_list
-    y_vec = [cur_y_list, ]
+    y_mx = [cur_y_list, ]
 
     for x in x_vec[:-1]:
         k1, k2, k3, k4 = _calc_k(eq_system, x, cur_y_list, h)
         k = (k1 + k2 * 2 + k3 * 2 + k4) / 6
         cur_y_list = cur_y_list + k
-        y_vec.append(cur_y_list)
+        y_mx.append(cur_y_list)
 
-    return x_vec, np.array(y_vec)
+    return x_vec, np.array(y_mx)
 
 
 def Runge_Kutta_with_auto_step(eq_system, y0_list, a, b, err):
+    '''возвращает вектор X и матрицу Y, в которой Y[i] соответствует X[i]'''
+
     H_MIN, E_MIN = (b-a)/10**4,  err/2**5
 
     def calc_h(eq_system, y_list, a, b, h, err):
@@ -48,22 +52,22 @@ def Runge_Kutta_with_auto_step(eq_system, y0_list, a, b, err):
 
     h = b-a
     cur_a, cur_y_list = a, y0_list
-    result_x, result_y = [a], [cur_y_list, ]
+    x_vec, y_mx = [a], [cur_y_list, ]
 
     while cur_a < b:
         h, cur_err = calc_h(eq_system, cur_y_list, cur_a, b, h, err)
-        _, y_list = Runge_Kutta_method(eq_system, result_y[-1], cur_a, cur_a+h, h)
+        _, y_list = Runge_Kutta_method(eq_system, y_mx[-1], cur_a, cur_a+h, h)
         cur_a += h
 
-        result_x.append(cur_a)
-        result_y.append(y_list[-1])
+        x_vec.append(cur_a)
+        y_mx.append(y_list[-1])
 
         if cur_err < E_MIN or h < H_MIN:
             h *= 2
 
-    return result_x, result_y
+    return x_vec, np.array(y_mx)
 
 
-def glob_err_norm(x_list, y_mx, eq_system):
+def global_error_norm(x_list, y_mx, eq_system):
     y_origin_mx = np.array([[f(x) for f in eq_system] for x in x_list])
     return np.abs((y_origin_mx - y_mx)).max()
