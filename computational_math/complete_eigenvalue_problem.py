@@ -1,18 +1,7 @@
 import numpy as np
 
 
-def _get_iters_amount(r_vec, err):
-    LIMIT = 10**3
-
-    size = r_vec.shape[0]
-    err_reducer = 1 - 2/(size*(size-1))
-    cur_err = r_vec.sum() * err_reducer
-
-    for amount in range(1, LIMIT):
-        cur_err *= err_reducer
-        if cur_err < err:
-            break
-    return amount
+LIMIT = 10**3
 
 
 def _mul_by_u_mx(mx, k, t, alpha, beta):
@@ -30,10 +19,12 @@ def jacobi_method(a_mx, err):
     b_mx = a_mx.copy()
     d_mx = np.identity(a_mx.shape[0])
 
-    iters_amount = _get_iters_amount(r_vec, err)
-    for _ in range(iters_amount):
-        # вычисление индексов k, l
+    for iters_amount in range(LIMIT):
         k = np.argmax(r_vec)
+
+        if r_vec[k] < err*10**-2:  # оценка вклада недиагональных элементов
+            break
+
         row = abs(b_mx[k])
         row[k] = 0
         t = np.argmax(row)  # t - это l

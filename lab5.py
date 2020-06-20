@@ -16,7 +16,7 @@ def main():
         line_it = filter(lambda s: not s.startswith('#'), line_it)
         line_it = takewhile(lambda s: s != '--break', line_it)
 
-        print('используется норма невязки вектора: ||a|| max(|a_i|)\n', file=writer)
+        print('используется норма невязки вектора: ||a|| = max(|a_i|)\n', file=writer)
         while True:
             lines = takewhile(lambda s: s, line_it)
 
