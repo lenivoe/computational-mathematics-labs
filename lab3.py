@@ -11,7 +11,7 @@ DATA_DIR = 'data/' + os.path.basename(__file__)[:-3]
 
 
 def to_numbers(s):
-    return [float(w) for w in re.split('[ |]', s) if w]
+    return np.array([float(w) for w in re.split('[ |]', s) if w])
 
 
 def gen_mx(rows_amount, cols_amount, min_val, max_val, is_symmetric=False):
@@ -39,16 +39,26 @@ def main():
                 x0_vec = to_numbers(next(line_it))
 
                 it = takewhile(lambda s: s, line_it)
-                a_mx = np.array([to_numbers(s) for s in it])
+                ab_mx = np.array([to_numbers(s) for s in it])
 
                 print(f'e: {err},  x0:', x0_vec, file=writer)
-                print(a_mx, file=writer)
+                print(ab_mx, '\n', file=writer)
 
-                x_vec = less.Jacobi_method(a_mx, err, x0_vec)
+                a_mx = ab_mx[:, :-1]
+                b_vec = ab_mx[:, -1]
+
+                print('Диагональное преобладание:', less.diag_prevalence(a_mx), '\n', file=writer)
+                print('Достаточное число итераций:', *less.criteria(ab_mx, err, x0_vec), file=writer)
+
+                x_vec, iters_amount = less.Jacobi_method(ab_mx, err, x0_vec)
                 print('Решение методом Якоби:', x_vec, file=writer)
+                print(f'Число итераций: {iters_amount}', file=writer)
+                print('Невязка', a_mx @ x_vec - b_vec, '\n', file=writer)
 
-                x_vec = less.Seidel_method(a_mx, err, x0_vec)
+                x_vec, iters_amount = less.Seidel_method(ab_mx, err, x0_vec)
                 print('Решение методом Зейделя:', x_vec, file=writer)
+                print(f'Число итераций: {iters_amount}', file=writer)
+                print('Невязка', a_mx @ x_vec - b_vec, '\n', file=writer)
                 print(file=writer)
 
             except StopIteration:
