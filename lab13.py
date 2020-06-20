@@ -32,14 +32,14 @@ def save_plot(img_name, title, x_vec, y_mx, a, b, desired_system):
 def main():
     eq_systems_names = [
         'dy/dx = cos(x) + (y - sin(x))',
-        'dy/dx = cos(x) + 10(y - sin(x))',
+        'dy/dx = cos(x) + 20(y - sin(x))',
         'dy1/dx = y1-2*y2\n' 'dy2/dx = y1-y2-2',
         'dy1/dx = 3*y1-y2\n' 'dy2/dx = 4*y1-y2',
     ]
 
     eq_systems = np.array([
         [lambda x, y: np.cos(x) + (y - np.sin(x))],
-        [lambda x, y: np.cos(x) + 10*(y - np.sin(x))],
+        [lambda x, y: np.cos(x) + 20*(y - np.sin(x))],
         [lambda x, y1, y2: y1-2*y2, lambda x, y1, y2: y1-y2-2],
         [lambda x, y1, y2: 3*y1-y2, lambda x, y1, y2: 4*y1-y2]
     ])
