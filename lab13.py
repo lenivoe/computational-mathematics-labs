@@ -5,6 +5,7 @@ import numpy as np
 import matplotlib.pyplot as plt
 
 import computational_math.runge_kutta as cmrk
+from computational_math.utils import scale_img
 
 
 DATA_DIR = 'data/' + os.path.basename(__file__)[:-3]
@@ -25,26 +26,27 @@ def save_plot(img_name, title, x_vec, y_mx, a, b, desired_system):
     ax.legend()
     fig.savefig(img_name, bbox_inches='tight', pad_inches=0)
     plt.close(fig)
+    scale_img(img_name, 0.7)
 
 
 def main():
     eq_systems_names = [
-        'dy/dx = 3x^2 + (y - x^3)',
-        'dy/dx = 3x^2 + 10(y - x^3)',
+        'dy/dx = cos(x) + (y - sin(x))',
+        'dy/dx = cos(x) + 10(y - sin(x))',
         'dy1/dx = y1-2*y2\n' 'dy2/dx = y1-y2-2',
         'dy1/dx = 3*y1-y2\n' 'dy2/dx = 4*y1-y2',
     ]
 
     eq_systems = np.array([
-        [lambda x, y: 3*x**2 + (y - x**3)],
-        [lambda x, y: 3*x**2 - 10*(y - x**3)],
+        [lambda x, y: np.cos(x) + (y - np.sin(x))],
+        [lambda x, y: np.cos(x) + 10*(y - np.sin(x))],
         [lambda x, y1, y2: y1-2*y2, lambda x, y1, y2: y1-y2-2],
         [lambda x, y1, y2: 3*y1-y2, lambda x, y1, y2: 4*y1-y2]
     ])
 
     desired_systems = np.array([
-        [lambda x: x**3],
-        [lambda x: x**3],
+        [np.sin],
+        [np.sin],
         [lambda x: -3*np.cos(x)+5*np.sin(x)+4, lambda x: - 4*np.cos(x)+np.sin(x)+2],
         [lambda x: (5 + 2*x)*np.e**x, lambda x: (8 + 4*x)*np.e**x]
     ])
@@ -115,5 +117,5 @@ def task5():
 
 
 if __name__ == '__main__':
-    # main()
-    task5()
+    main()
+    # task5()
