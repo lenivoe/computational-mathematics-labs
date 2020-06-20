@@ -6,7 +6,6 @@ def get_lr():
     l, r = 1, 2
     return l, r
 
-
 def get_condition():
     l, r = get_lr()
 
@@ -16,7 +15,6 @@ def get_condition():
 
     return l, r, F1, F2, D1, D2, E1, E2
 
-
 def get_ABC():
     def A(x): return 2/x
     def B(x): return -1
@@ -24,12 +22,10 @@ def get_ABC():
 
     return A, B, C
 
-
 def get_u_vec(n):
     l, r = get_lr()
     def u(x): return (np.e**(-x))/x
     return ((u(x) for x in [np.arange(l, r, h) + [r]]))
-
 
 def calc_ABCD_vec(a, b, c, d, h, l, r):
     x_vec = np.arange(l + h, r, h)
@@ -41,7 +37,6 @@ def calc_ABCD_vec(a, b, c, d, h, l, r):
     d_vec = [d[0], *[C(x) * h**2 for x in x_vec], d[1]]
 
     return (a_vec, b_vec, c_vec, d_vec)
-
 
 def first_aprox(n):
     l, r, F1, F2, D1, D2, E1, E2 = get_condition()
@@ -56,7 +51,6 @@ def first_aprox(n):
     vec_ABCD = calc_ABCD_vec((a0, an), (b0, bn), (c0, cn), (d0, dn), h, l, r)
 
     return tma.calc(vec_ABCD)
-
 
 def second_aprox(n):
     l, r, F1, F2, D1, D2, E1, E2 = get_condition()
@@ -78,19 +72,18 @@ def second_aprox(n):
     return tma.calc(vec_ABCD)
 
 # TODO эту я совсем не меняла
-
-
 def c_norm(y1, y2):
     return max(map(lambda y: abs(y[0] - y[1]), zip(y1, y2)))
 
-
 def main():
     cells = [25, 50, 100, 200]
+    norm_first_list = []
+    norm_sec_list = []
     for n in cells:
         result_fa = first_aprox(n)
         result_sa = second_aprox(n)
 
         result_orig = get_u_vec(n)
 
-        norm_first = c_norm(result_fa, result_orig)
-        norm_sec = c_norm(result_sa, result_orig)
+        norm_first_list.append(c_norm(result_fa, result_orig))
+        norm_sec_list.append(c_norm(result_sa, result_orig))
