@@ -22,14 +22,12 @@ def Runge_Kutta_method(eq_system, y0_list, a, b, h):
     '''возвращает вектор X и матрицу Y, в которой Y[i] соответствует X[i]'''
 
     x_vec = np.concatenate([np.arange(a, b, h), [b]])
-    cur_y_list = y0_list
-    y_mx = [cur_y_list, ]
+    y_mx = [y0_list, ]
 
     for x in x_vec[:-1]:
-        k1, k2, k3, k4 = _calc_k(eq_system, x, cur_y_list, h)
+        k1, k2, k3, k4 = _calc_k(eq_system, x, y_mx[-1], h)
         k = (k1 + k2 * 2 + k3 * 2 + k4) / 6
-        cur_y_list = cur_y_list + k
-        y_mx.append(cur_y_list)
+        y_mx.append(y_mx[-1] + k)
 
     return x_vec, np.array(y_mx)
 

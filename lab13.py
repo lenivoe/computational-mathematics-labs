@@ -14,12 +14,12 @@ IMG_DIR = f'{DATA_DIR}/img'
 def save_plot(img_name, title, x_vec, y_mx, a, b, desired_system):
     fig, ax = plt.subplots()
 
-    for i in range(y_mx.shape[1]):
-        ax.plot(x_vec, y_mx[:, i], label=f'вычисленная y{i+1}')
-
     x_points = np.linspace(a, b, int((b-a)*200))
     for i, func in enumerate(desired_system):
-        ax.plot(x_points, [*map(func, x_points)], linewidth=2, label=f'искомая y{i+1}')
+        ax.plot(x_points, [*map(func, x_points)], label=f'искомая y{i+1}')
+
+    for i in range(y_mx.shape[1]):
+        ax.plot(x_vec, y_mx[:, i], linewidth=2, linestyle='dashed', label=f'вычисленная y{i+1}')
 
     ax.set_title(title)
     ax.legend()
@@ -29,22 +29,22 @@ def save_plot(img_name, title, x_vec, y_mx, a, b, desired_system):
 
 def main():
     eq_systems_names = [
-        'dy/dx = 2x + y - x**2',
-        'dy/dx = 2x + 5(y - x**2)',
-        'dy1/dx = -y1-2*y2\n' 'dy2/dx = y1-y2-2',
+        'dy/dx = 3x^2 + (y - x^3)',
+        'dy/dx = 3x^2 + 10(y - x^3)',
+        'dy1/dx = y1-2*y2\n' 'dy2/dx = y1-y2-2',
         'dy1/dx = 3*y1-y2\n' 'dy2/dx = 4*y1-y2',
     ]
 
     eq_systems = np.array([
-        [lambda x, y: 3 * x**2 + (y - x**3)],
-        [lambda x, y: 3 * x**2 - 10 * (y - x**3)],
+        [lambda x, y: 3*x**2 + (y - x**3)],
+        [lambda x, y: 3*x**2 - 10*(y - x**3)],
         [lambda x, y1, y2: y1-2*y2, lambda x, y1, y2: y1-y2-2],
         [lambda x, y1, y2: 3*y1-y2, lambda x, y1, y2: 4*y1-y2]
     ])
 
     desired_systems = np.array([
-        [lambda x: x**2],
-        [lambda x: x**2],
+        [lambda x: x**3],
+        [lambda x: x**3],
         [lambda x: -3*np.cos(x)+5*np.sin(x)+4, lambda x: - 4*np.cos(x)+np.sin(x)+2],
         [lambda x: (5 + 2*x)*np.e**x, lambda x: (8 + 4*x)*np.e**x]
     ])
@@ -97,7 +97,7 @@ def main():
 
 def task5():
     system_name = 'du/dx + 30u = 0'
-    system = [lambda x, y: -30 * y]
+    system = [lambda x, y: -30*y]
     a, b = 0, 1
     y0_list = [1]
     h_list = [(b-a)/10, (b-a)/11]
@@ -107,13 +107,13 @@ def task5():
         for i, h in enumerate(h_list):
             x_vec, y_mx = cmrk.Runge_Kutta_method(system, y0_list, a, b, h)
 
-            title = f'{system_name}\n' '[{a}, {b}]   h: {h} \n'
+            title = f'{system_name}\n' f'[{a}, {b}]   h: {h}\n'
             print(title, file=writer)
-            save_plot(f'{i}.png', title, x_vec, y_mx, a, b, [])
+            save_plot(f'{IMG_DIR}/task5-{i}.png', title, x_vec, y_mx, a, b, [])
 
         print(file=writer)
 
 
 if __name__ == '__main__':
-    main()
-    # task5()
+    # main()
+    task5()
