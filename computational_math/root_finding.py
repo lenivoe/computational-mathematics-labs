@@ -58,3 +58,26 @@ def find_roots(func, dfunc, d2func, border_points, err):
         roots.append((b, 0, a, b))
 
     return roots
+
+
+def secant_method(func, prev_x, x, err, need_iters_amount=False):
+    LIMIT = 10**3
+
+    # при делении на ноль или выходе из области определения функции
+    # отлавливается исключение и считается, что решение не найдено
+    with np.errstate(all='raise'):
+        try:
+            for iters_amount in range(LIMIT):
+                next_x = chord(prev_x, x, func)
+                if abs(next_x - x) < err:
+                    break
+                x, prev_x = next_x, x
+            else:
+                iters_amount = np.Inf
+
+            result_x = x + (next_x - x)/2
+
+        except FloatingPointError:
+            result_x, iters_amount = np.NaN, np.Inf
+
+        return (result_x, iters_amount) if need_iters_amount else result_x
