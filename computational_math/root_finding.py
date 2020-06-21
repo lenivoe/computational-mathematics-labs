@@ -5,22 +5,22 @@ def sign(x):
     return x and (-1, 1)[int(x > 0)]
 
 
-def secant(p, q, func):
+def chord(p, q, func):
     return q - func(q)*(p-q)/(func(p)-func(q))
+
 
 def Newton(t, func, dfunc):
     return t - func(t) / dfunc(t)
 
 
-
 def combined(a, b, func, dfunc, d2func):
     if dfunc(a) * d2func(a) >= 0:
-        a = secant(a, b, func)
+        a = chord(a, b, func)
         b = Newton(b, func, dfunc)
     else:
-        b = secant(b, a, func)
+        b = chord(b, a, func)
         a = Newton(a, func, dfunc)
-        
+
     return a, b
 
 
@@ -41,7 +41,6 @@ def combined_method(a, b, func, dfunc, d2func, err):
         return a+(b-a)/2, np.Inf
 
 
-
 def find_roots(func, dfunc, d2func, border_points, err):
     '''Находит корни уравнения на указанных отрезках.'''
     roots = []
@@ -59,4 +58,3 @@ def find_roots(func, dfunc, d2func, border_points, err):
         roots.append((b, 0, a, b))
 
     return roots
-
