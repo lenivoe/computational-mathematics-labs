@@ -1,49 +1,63 @@
-from computational_math.runge_kutta import Runge_Kutta_with_auto_step
-import numpy as np
+import os
+
+import matplotlib.pyplot as plt
+
+from computational_math.shooting_method import shooting_method
+from computational_math.utils import scale_img
 
 
-# TODO комментарий из лабы Саши:
-# метод написан для решения системы из двух уравнений,
-# причем первое уравнение (v) имеет начальное условие (решение в точке a, v(a) или v0),
-# а второе (u) не имеет, но имеет решение на правой границе интервала (u(b))
-# lt, rt - интервал, внутри которого (как ожидается) лежит u(a)
-# a, b - интервал для Коши
-def shooting_method(eq_system, a, b, lt, tr, va, ub, h, e):
-    segment = find_segment(eq_system, a, b, lt, tr, va, ub, h, e)
-    if segment is None : raise Exception('На данном нитервале отсутствует решение')
-    x_vec, y_vec = find_ua(eq_system, a, b, va, ub, h, e, segment)
-    return x_vec, y_vec
+DATA_DIR = 'data/' + os.path.basename(__file__)[:-3]
+IMG_DIR = f'{DATA_DIR}/img'
 
 
-def find_segment(eq_system, a, b, lt, rt, va, ub, h, e):
-    def calc_ub(ua):
-        _, result = Runge_Kutta_with_auto_step(eq_system, np.array((va, ua)), a, b, e)
-        return result[-1][1]
+def main():
+    if not os.path.isdir(IMG_DIR):
+        os.makedirs(IMG_DIR)
+    for fname in os.listdir(IMG_DIR):
+        os.remove(f'{IMG_DIR}/{fname}')
 
-    vector = np.array([np.arange(lt, rt, h)])
+    N, R, n = 1, 1.94, 2
+    eq_system = [lambda x, y, u: u, lambda x, y, u: N*u + N*R*y**n]
 
-    right_value = calc_ub(lt)
-    left_value = None
-    for i in range(1, len(vector)):
-        left_value = right_value
-        right_value = calc_ub(vector[i])
+    def get_first_values(y_a):
+        ''' по одному из значений y(a), u(a) возвращает оба '''
+        return y_a, N * (y_a - 1)
 
-        if (ub - left_value) >= 0 and (right_value - ub) > 0:
-            return (vector[i-1], vector[i])
-    return None
+    def second_boundary_condition(y_b, u_b):
+        ''' левая часть уравнения fi2( y(b), u(b) ) = 0 '''
+        return u_b
+
+    a, b = 0, 1
+    err = 10**-4
+    p0, p1 = 0.1, 0.7
+
+    x_vec, y_mx = shooting_method(eq_system, a, b, err, p0, p1, get_first_values, second_boundary_condition)
+
+    eq_system_name = "y'' - y' - 1.94y^2 = 0,\n"
+    eq_system_name += "y'(0) = y(0) - 1,\n"
+    eq_system_name += "y'(1) = 0"
+
+    ofname = f'{DATA_DIR}/output.txt'
+    with open(ofname, 'w', encoding='utf-8') as writer:
+        print(eq_system_name, '\n', file=writer)
+        print('Начальные приближения для y(0):', p0, p1, file=writer)
+        print('Точность:', err, '\n', file=writer)
+        print(f"{'z':>8} {'y(z)':>25} {' ':20}y'(z)", file=writer)
+        data = zip(x_vec, y_mx.transpose()[0], y_mx.transpose()[1])
+        print(*map(lambda d: f'{d[0]:8} {d[1]:25} {d[2]:25}', data), sep='\n', file=writer)
+
+    fig, (ax_y, ax_u) = plt.subplots(1, 2, figsize=(12, 5))
+    fig.suptitle(eq_system_name)
+
+    ax_y.plot(x_vec, y_mx[:, 0], label='y(z)')
+    ax_y.legend()
+    ax_u.plot(x_vec, y_mx[:, 1], label="y'(z)", color='orange')
+    ax_u.legend()
+
+    fig.savefig(f'{IMG_DIR}/img.png', bbox_inches='tight', pad_inches=0)
+    plt.close(fig)
+    scale_img(f'{IMG_DIR}/img.png', 1)
 
 
-def find_ua(eq_system, a, b, va, ub, h, e, segment):
-    lt, rt = segment
-    while True:
-        mdl = (lt+rt)/2
-        x_vector, y_vector = Runge_Kutta_with_auto_step(eq_system, np.array((va, mdl)), a, b, e)
-        cur_ub = y_vector[-1][1]
-        if abs(cur_ub - ub) < e:
-            break
-        elif cur_ub > ub:
-            rt = mdl
-        else:
-            lt = mdl
-
-    return x_vector, y_vector
+if __name__ == '__main__':
+    main()
