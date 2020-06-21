@@ -30,6 +30,10 @@ def save_plot(img_name, title, x_vec, y_mx, a, b, desired_system):
 
 
 def main():
+    if True:
+        task5()
+        return
+
     eq_systems_names = [
         'dy/dx = cos(x) + (y - sin(x))',
         'dy/dx = cos(x) + 20(y - sin(x))',
@@ -102,7 +106,7 @@ def task5():
     system = [lambda x, y: -30*y]
     a, b = 0, 1
     y0_list = [1]
-    h_list = [(b-a)/10, (b-a)/11]
+    h_list = [(b-a)/10, (b-a)/11, (b-a)/10**5]
 
     ofname = f'{DATA_DIR}/output.txt'
     with open(ofname, 'w', encoding='utf-8') as writer:
@@ -118,4 +122,3 @@ def task5():
 
 if __name__ == '__main__':
     main()
-    # task5()
