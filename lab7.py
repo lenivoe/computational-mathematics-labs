@@ -17,7 +17,7 @@ IMG_DIR = f'{DATA_DIR}/img'
 
 def plot(*func_list, labels=None, title='', x_min=-1, x_max=1, need_show=True, img_name=None):
     '''
-        Отображает графики указанных функий функций
+        Отображает графики указанных функций
         - func_list - список функций для отображаения на графике
         - labels - необязательные метки графиков функций
         - title - заголовок
@@ -60,6 +60,9 @@ def str_to_filename(s: str):
 
 def get_plot_filename(test_mode, func_name, nodes_x):
     amount = reduce(lambda sum, _: sum+1, os.listdir(f'{IMG_DIR}'), 1)
+    max_size = 10
+    if len(nodes_x) > max_size:
+        nodes_x = [*nodes_x[:max_size // 2 - 1], '...', *nodes_x[-(max_size // 2 + 1):]]
     nodes_str = " ".join(map(str, nodes_x))
     return f'{IMG_DIR}/{amount:03} {test_mode} {str_to_filename(func_name)} [{nodes_str}].png'
 
@@ -77,7 +80,9 @@ def main():
 
     ifname = f'{DATA_DIR}/input.txt'
     with open(ifname, 'r') as reader:
-        for fname in os.listdir(f'{IMG_DIR}'):
+        if not os.path.isdir(IMG_DIR):
+            os.mkdir(IMG_DIR)
+        for fname in os.listdir(IMG_DIR):
             os.remove(f'{IMG_DIR}/{fname}')
 
         reader_it = iter(s.strip() for s in reader if not s.isspace() and not s.startswith('#'))
@@ -130,8 +135,16 @@ def standard_test(lines_it, func_tests):
 
     labels = (func_name, 'Lagrange', 'spline')
     image_name = get_plot_filename('standard', func_name, nodes_x)
-    plot(func, L_n, S, labels=labels, title=title,
-         x_min=nodes_x[0], x_max=nodes_x[-1], need_show=False, img_name=image_name)
+
+    shift = (nodes_x[-1] - nodes_x[0]) * 0.1
+    plot(func, L_n, S,
+        labels=labels,
+        title=title,
+        x_min=nodes_x[0] - shift,
+        x_max=nodes_x[-1] + shift,
+        need_show=False,
+        img_name=image_name
+    )
 
 
 def errors_test(lines_it, func_tests):
